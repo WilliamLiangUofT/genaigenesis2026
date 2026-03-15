@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SignalShield - User Portal</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>SignalShield User Portal</h1>
+      <p class="subtitle">Register, login, and submit transactions for fraud screening.</p>
+    </header>
+
+    <main class="grid">
+      <section class="card">
+        <h2>Register</h2>
+        <form id="register-form">
+          <label>
+            Username
+            <input type="text" id="reg-username" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="reg-password" required />
+          </label>
+          <label>
+            Country
+            <input type="text" id="reg-country" value="US" />
+          </label>
+          <button type="submit">Register</button>
+        </form>
+        <pre id="register-output" class="output"></pre>
+      </section>
+
+      <section class="card">
+        <h2>Login</h2>
+        <form id="login-form">
+          <label>
+            Username
+            <input type="text" id="login-username" required />
+          </label>
+          <label>
+            Password
+            <input type="password" id="login-password" required />
+          </label>
+          <label>
+            Device ID
+            <input type="text" id="login-device" value="device-1" />
+          </label>
+          <label>
+            IP Address
+            <input type="text" id="login-ip" value="10.0.0.1" />
+          </label>
+          <label>
+            Location
+            <input type="text" id="login-location" value="US" />
+          </label>
+          <button type="submit">Login</button>
+        </form>
+        <pre id="login-output" class="output"></pre>
+      </section>
+
+      <section class="card card-wide">
+        <h2>Initiate Transaction</h2>
+        <form id="tx-form">
+          <div class="grid-2">
+            <label>
+              Username
+              <input type="text" id="tx-username" required />
+            </label>
+            <label>
+              Amount
+              <input type="number" step="0.01" id="tx-amount" required />
+            </label>
+            <label>
+              Merchant
+              <input type="text" id="tx-merchant" value="Acme Store" />
+            </label>
+            <label>
+              Channel
+              <select id="tx-channel">
+                <option value="online">Online</option>
+                <option value="pos">POS</option>
+                <option value="atm">ATM</option>
+              </select>
+            </label>
+            <label>
+              Location
+              <input type="text" id="tx-location" value="US" />
+            </label>
+            <label>
+              Device ID
+              <input type="text" id="tx-device" value="device-1" />
+            </label>
+          </div>
+          <button type="submit">Score Transaction</button>
+        </form>
+        <div id="tx-result" class="tx-result hidden">
+          <h3>Fraud Risk Result</h3>
+          <p id="tx-status" class="tx-status"></p>
+          <p><strong>Risk Score:</strong> <span id="tx-risk"></span></p>
+          <p><strong>Confidence Interval:</strong> <span id="tx-ci"></span></p>
+          <p><strong>Decision:</strong> <span id="tx-decision"></span></p>
+          <p><strong>Review ID:</strong> <span id="tx-review-id"></span></p>
+          <h4>Reasons</h4>
+          <ul id="tx-reasons"></ul>
+        </div>
+        <pre id="tx-output" class="output"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>

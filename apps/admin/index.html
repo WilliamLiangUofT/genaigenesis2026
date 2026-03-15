@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>SignalShield - Fraud Analyst Console</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <h1>SignalShield Analyst Console</h1>
+      <p class="subtitle">Review borderline transactions and provide fraud decisions.</p>
+    </header>
+
+    <main>
+      <section class="card">
+        <div class="toolbar">
+          <button id="refresh-btn">Refresh Queue</button>
+          <span id="queue-count" class="muted"></span>
+        </div>
+        <div class="table-wrapper">
+          <table>
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>User</th>
+                <th>Amount</th>
+                <th>Merchant</th>
+                <th>Channel</th>
+                <th>Location</th>
+                <th>Risk</th>
+                <th>Reasons</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="queue-body">
+              <tr>
+                <td colspan="9" class="muted">No items yet. Trigger transactions from the user portal.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <pre id="admin-output" class="output"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
