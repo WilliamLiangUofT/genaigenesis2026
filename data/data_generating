@@ -1,0 +1,120 @@
+import os
+import random
+from datetime import datetime, timedelta, timezone
+
+import pandas as pd
+
+
+def generate_transactions_csv(
+    output_path: str = "data/transactions.csv",
+    n_users: int = 500,
+    min_tx_per_user: int = 20,
+    max_tx_per_user: int = 120,
+    fraud_rate: float = 0.1,
+    seed: int = 42,
+    large_amount_fraud_prob: float = 0.92,
+    large_amount_multiplier: float = 2.5,
+) -> pd.DataFrame:
+    random.seed(seed)
+
+    channels = ["online", "pos", "atm"]
+    countries = ["US", "CA", "GB", "DE", "FR", "MX", "ES", "IT", "AU", "JP", "IN", "BR", "NL"]
+    rows = []
+
+    start_time = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    end_time = datetime(2024, 12, 31, 23, 59, 59, tzinfo=timezone.utc)
+    total_seconds = int((end_time - start_time).total_seconds())
+
+    for device_idx in range(1, n_users + 1):
+        device_id = f"device-{device_idx:04d}"
+        n_tx = random.randint(min_tx_per_user, max_tx_per_user)
+
+        # Give each device a base spending pattern and a "home" country
+        base_amount = random.uniform(10, 200)
+        home_country = random.choice(countries)
+
+        for _ in range(n_tx):
+            # Random timestamp in 2024
+            offset_seconds = random.randint(0, total_seconds)
+            ts = start_time + timedelta(seconds=offset_seconds)
+
+            # Channel distribution
+            channel = random.choices(
+                population=channels,
+                weights=[0.45, 0.45, 0.10],  # online, pos, atm
+                k=1,
+            )[0]
+
+            # Geo: mostly home country, sometimes abroad
+            if random.random() < 0.88:
+                country = home_country
+            else:
+                country = random.choice([c for c in countries if c != home_country])
+
+            # Normal amount generation
+            amount = max(1.0, random.gauss(base_amount, base_amount * 0.5))
+
+            # Fraud logic: most large amounts are marked as fraud
+            threshold = base_amount * large_amount_multiplier
+            if amount >= threshold:
+                is_fraud = 1 if random.random() < large_amount_fraud_prob else 0
+            else:
+                is_fraud = 1 if random.random() < fraud_rate else 0
+
+            if is_fraud:
+                # Fraud transactions tend to be more extreme / unusual
+                fraud_pattern = random.choice(["high", "small_burst", "atm_spike"])
+                if fraud_pattern == "high":
+                    amount *= random.uniform(4, 15)
+                    channel = random.choices(
+                        population=channels,
+                        weights=[0.7, 0.1, 0.2],
+                        k=1,
+                    )[0]
+                    # Fraud often from unexpected country
+                    country = random.choice([c for c in countries if c != home_country])
+                elif fraud_pattern == "small_burst":
+                    amount = random.uniform(1, 30)
+                    channel = "online"
+                else:  # atm_spike
+                    amount *= random.uniform(2, 8)
+                    channel = "atm"
+
+            rows.append(
+                {
+                    "device_id": device_id,
+                    "timestamp": ts.strftime("%Y-%m-%dT%H:%M:%SZ"),
+                    "amount": round(amount, 2),
+                    "channel": channel,
+                    "country": country,
+                    "is_fraud": is_fraud,
+                }
+            )
+
+    df = pd.DataFrame(rows)
+
+    # Sort by timestamp to make the dataset more realistic
+    df["timestamp_dt"] = pd.to_datetime(df["timestamp"], utc=True)
+    df = df.sort_values(["device_id", "timestamp_dt"]).drop(columns=["timestamp_dt"]).reset_index(drop=True)
+
+    # Make sure output folder exists
+    os.makedirs(os.path.dirname(output_path), exist_ok=True)
+
+    # Save CSV
+    df.to_csv(output_path, index=False)
+
+    return df
+
+
+if __name__ == "__main__":
+    df = generate_transactions_csv(
+        output_path="data/transactions.csv",
+        n_users=500,
+        min_tx_per_user=20,
+        max_tx_per_user=120,
+        fraud_rate=0.03,
+        seed=42,
+    )
+
+    print(f"Saved {len(df)} rows to data/transactions.csv")
+    print(df.head(10))
